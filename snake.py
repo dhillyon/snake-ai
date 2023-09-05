@@ -2,7 +2,6 @@ import pygame
 import sys
 import random as r
 import heapq
-from queue import PriorityQueue
 
 # Initialise Pygame
 pygame.init()
