@@ -2,6 +2,7 @@ import pygame
 import sys
 import random as r
 import heapq
+from queue import PriorityQueue
 
 # Initialise Pygame
 pygame.init()
@@ -12,11 +13,13 @@ SCREEN_WIDTH, SCREEN_HEIGHT = 400, 400
 GRID_SIZE = 20
 GRID_WIDTH = SCREEN_WIDTH // GRID_SIZE
 GRID_HEIGHT = SCREEN_HEIGHT // GRID_SIZE
+MAX_TICKS_WITHOUT_PATH = 1
 
 # Colour constants
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
+BLUE = (0, 0, 255)
 
 # Directional vectors
 UP = (0, -1)
@@ -29,25 +32,12 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Snake AI")
 font = pygame.font.Font(None, 36)
 
-def update_grid(grid, x, y, value):
-    grid[y][x] = value
-
-# Spawns an apple in a random location
-def init_apple(grid):
-    apple = (r.randint(0, GRID_WIDTH - 1), r.randint(0, GRID_HEIGHT-1))
-    
-    # Ensure the apple can't spawn inside the snake
-    while grid[apple[0]][apple[1]] == "snake":
-        apple = (r.randint(0, GRID_WIDTH - 1), r.randint(0, GRID_HEIGHT-1))
-    
-    update_grid(grid, apple[0], apple[1], "apple")
-    return apple
-
 # Main game loop
 def main(): 
     score = 0
     clock = pygame.time.Clock()
     run = True
+    ticks_without_path = 0
     
     # Initialise grid. Used as a search space for the AI algorithm
     grid = [[None for _ in range(GRID_HEIGHT+1)] for _ in range(GRID_WIDTH+1)]
@@ -58,7 +48,7 @@ def main():
     snake_dir = RIGHT
 
     # Initialise apple
-    apple = init_apple(grid)
+    apple = init_apple(grid, snake)
     
     while run:
         # Set frame rate
@@ -66,16 +56,23 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-            elif event.type == pygame.KEYDOWN: # Temp user input
-                if event.key == pygame.K_UP and snake_dir != DOWN:
-                    snake_dir = UP
-                elif event.key == pygame.K_DOWN and snake_dir != UP:
-                    snake_dir = DOWN
-                elif event.key == pygame.K_LEFT and snake_dir != RIGHT:
-                    snake_dir = LEFT
-                elif event.key == pygame.K_RIGHT and snake_dir != LEFT:
-                    snake_dir = RIGHT
+        
+        path = dijkstra(grid, snake[0], apple, snake)
+
+        if path != []:
+            ticks_without_path = 0
+            next_move = (path[0][0] - snake[0][0], path[0][1] - snake[0][1])
+        else:
+            # No path is found. Increment tick counter
+            ticks_without_path += 1
             
+            # Snake has had no path for too long. Find valid moves until a path opens up. 
+            if ticks_without_path >= MAX_TICKS_WITHOUT_PATH:
+                next_move = find_valid_move(grid, snake, snake_dir)
+                print(next_move)
+            
+        snake_dir = next_move
+        
         # Background colour
         screen.fill(WHITE)
         
@@ -94,7 +91,7 @@ def main():
         
         # Check if snake eats the apple
         if snake[0] == apple:
-            apple = init_apple(grid)
+            apple = init_apple(grid, snake)
             score += 1
         else:
             snake.pop()
@@ -116,7 +113,10 @@ def main():
         
         # Drawing the snake
         for segment in snake:
-            pygame.draw.rect(screen, GREEN, (segment[0] * GRID_SIZE, segment[1] * GRID_SIZE, GRID_SIZE, GRID_SIZE))
+            if segment == snake[0]: # Head
+                pygame.draw.rect(screen, BLUE, (segment[0] * GRID_SIZE, segment[1] * GRID_SIZE, GRID_SIZE, GRID_SIZE)) #Head
+            else:
+                pygame.draw.rect(screen, GREEN, (segment[0] * GRID_SIZE, segment[1] * GRID_SIZE, GRID_SIZE, GRID_SIZE))
         
         # Drawing the apple
         pygame.draw.rect(screen, RED, (apple[0] * GRID_SIZE, apple[1] * GRID_SIZE, GRID_SIZE, GRID_SIZE))
@@ -124,8 +124,100 @@ def main():
         pygame.display.update()
      
     pygame.quit()
-    print(grid)
     sys.exit()
+
+# Simple implementation of Dijkstras algorithm. Finds shortest path from start to goal in grid.
+def dijkstra(grid, start, goal, snake):
+    # Init the fringe set with start node
+    fringe_set = [(0, start)]
+    heapq.heapify(fringe_set)
+    came_from = {}
+    
+    # Init costs
+    cost = {(x, y): float('inf') for x in range(GRID_WIDTH) for y in range(GRID_HEIGHT)}
+    cost[start] = 0
+    
+    while fringe_set:
+        _, current_node = heapq.heappop(fringe_set)
+        
+        if current_node == goal:
+            path = []
+            while current_node in came_from:
+                path.append(current_node)
+                current_node = came_from[current_node]
+            
+            path.reverse()
+            return path
+
+        for move in [UP, DOWN, LEFT, RIGHT]:
+            neighbour = (current_node[0] + move[0], current_node[1] + move[1])
+            
+            if (
+                0 <= neighbour[0] < GRID_WIDTH
+                and 0 <= neighbour[1] < GRID_HEIGHT
+                and (neighbour[0], neighbour[1]) not in snake # Avoid snake body
+            ):
+                tentative_cost = cost[current_node] + 1
+                
+                if tentative_cost < cost[neighbour]:
+                    came_from[neighbour] = current_node
+                    cost[neighbour] = tentative_cost
+                    heapq.heappush(fringe_set, (cost[neighbour], neighbour))
+        
+    return [] # No path
+
+# For use when there is no path to apple. Finds a valid empty cell to move into.
+def find_valid_move(grid, snake, snake_dir):
+    head = snake[0]
+    
+    # Check if upcoming cell is valid
+    upcoming_cell = (head[0] + snake_dir[0], head[1] + snake_dir[1])
+    if (
+        0 <= upcoming_cell[0] < GRID_WIDTH
+        and 0 <= upcoming_cell[1] < GRID_HEIGHT
+        and upcoming_cell not in snake
+    ):
+        return snake_dir
+    
+    else:
+        for move in [UP, RIGHT, DOWN, LEFT]:
+            # Check if move is opposite to snakes direction
+            if (
+                (move == UP and snake_dir == DOWN)
+                or (move == DOWN and snake_dir == UP)
+                or (move == LEFT and snake_dir == RIGHT)
+                or (move == RIGHT and snake_dir == LEFT)
+            ):
+                continue
+            
+            neighbour = (head[0] + move[0], head[1] + move[1])
+            
+            # Check if neighbour is valid
+            if (
+                0 <= neighbour[0] < GRID_WIDTH
+                and 0 <= neighbour[1] < GRID_HEIGHT
+                and grid[neighbour[0]][neighbour[1]] is None
+            ):
+                return move
+            else:
+                continue
+    
+    return snake_dir # No suitable move
+
+# Self explanatory
+def update_grid(grid, x, y, value):
+    grid[y][x] = value
+
+# Spawns an apple in a random location
+def init_apple(grid, snake):
+    apple = (r.randint(0, GRID_WIDTH - 1), r.randint(0, GRID_HEIGHT-1))
+    
+    # Ensure the apple can't spawn inside the snake
+    while apple in snake:
+        apple = (r.randint(0, GRID_WIDTH - 1), r.randint(0, GRID_HEIGHT-1))
+    
+    update_grid(grid, apple[0], apple[1], "apple")
+    return apple
 
 if __name__ == "__main__":
     main()
