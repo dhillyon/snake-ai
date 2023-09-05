@@ -1,2 +1,2 @@
 # snake-ai
-An Artificial Intelligence agent that plays and attempts to beat the game "Snake".
+Basic Artificial Intelligence concepts are used to play and attempt to beat the game "Snake".
