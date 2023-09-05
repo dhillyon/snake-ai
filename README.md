@@ -1,5 +1,6 @@
 # snake-ai
-Basic Artificial Intelligence concepts are applied to play and beat the game "Snake".
+Basic AI path finding concepts are applied to play and beat the game "Snake".
+Currently only implemented via Dijkstra's path-finding algorithm
 
 ## Run locally
 1. Fork the repository by clicking on `Fork` option on the top right of the repository.
