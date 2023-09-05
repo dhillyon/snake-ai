@@ -68,7 +68,6 @@ def main():
             # Snake has had no path for too long. Find valid moves until a path opens up. 
             if ticks_without_path >= MAX_TICKS_WITHOUT_PATH:
                 next_move = find_valid_move(grid, snake, snake_dir)
-                print(next_move)
             
         snake_dir = next_move
         
@@ -98,7 +97,6 @@ def main():
         # Update grid
         for segment in snake:
             update_grid(grid, segment[0], segment[1], "snake")
-        
         
         # Check if snake collides with the wall OR itself
         if (
