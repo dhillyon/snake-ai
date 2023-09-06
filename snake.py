@@ -7,7 +7,7 @@ import heapq
 pygame.init()
 
 # Constants
-FPS = 40
+FPS = 10
 SCREEN_WIDTH, SCREEN_HEIGHT = 400, 400
 GRID_SIZE = 20
 GRID_WIDTH = SCREEN_WIDTH // GRID_SIZE
