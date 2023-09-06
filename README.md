@@ -16,3 +16,6 @@ Currently the snake's behaviour is implemented via [Dijkstra's](https://en.wikip
    pip install requirements.txt
    ```
 6. Run the game using `python snake.py` or `python3 snake.py`
+
+## Demo
+![Demo](snake demo.gif)
