@@ -18,4 +18,4 @@ Currently the snake's behaviour is implemented via [Dijkstra's](https://en.wikip
 6. Run the game using `python snake.py` or `python3 snake.py`
 
 ## Demo
-![Demo](snake demo.gif)
+![Demo](https://github.com/dbarrett4/snake-ai/blob/8bcb572944eaf4cad8b43befbb95c081d3f99dc1/snakedemo.gif)
