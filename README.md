@@ -19,3 +19,7 @@ Currently the snake's behaviour is implemented via [Dijkstra's](https://en.wikip
 
 ## Demo
 ![Demo](https://github.com/dbarrett4/snake-ai/blob/8bcb572944eaf4cad8b43befbb95c081d3f99dc1/snakedemo.gif)
+
+## How it works
+- Once per tick (frame):
+   - d
