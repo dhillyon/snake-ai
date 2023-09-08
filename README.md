@@ -5,7 +5,7 @@ Currently the snake's behaviour is implemented via [Dijkstra's](https://en.wikip
 
 ## Run locally
 1. Fork the repository by clicking on `Fork` option on the top right of the repository.
-2. Open Command Prompt or Git Bash on your local computer. (Git Bash recommended)
+2. Open a terminal on your local computer.
 3. Clone the forked repository by adding your own GitHub username in place of `<username>`.
    ```
    git clone https://github.com/<username>/snake-ai
