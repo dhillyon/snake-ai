@@ -26,5 +26,6 @@ Currently the snake's behaviour is implemented via [Dijkstra's](https://en.wikip
       - Sometimes there is no path. The apple may spawn in a section of the grid cut off by the snakes body, as an example.
       - In such cases, the snake finds the longest possible path of empty cells in an attempt to stay alive for as long as possible or until a path to the apple opens up.
       - Continues as per below with that path.
-   2. The snake uses the co-ordinates of the first cell on that path and the co-ordinates of it's head to calculate it's direction vector, stored as `snake_dir`.
-   3. The snake moves one cell in the direction indicated by the `snake_dir` vector.
+   2. The snake uses the co-ordinates of the first cell on that path and the co-ordinates of it's head to calculate it's new direction vector, stored as `snake_dir`.
+      - `snake_dir = (path[0][0] - snake[0][0], path[0][1] - snake[0][1])`
+   4. The snake moves one cell in the direction indicated by the `snake_dir` vector.
