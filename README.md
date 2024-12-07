@@ -4,11 +4,9 @@ Basic AI path finding concepts are applied to play and beat the game "Snake". Th
 The snake's behaviour is implemented via [Dijkstra's](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm) path-finding algorithm.
 
 ## Run locally
-1. Fork the repository by clicking on `Fork` option on the top right of the repository.
-2. Open a terminal on your local computer.
-3. Clone the forked repository by adding your own GitHub username in place of `<username>`.
+3. Clone the repository.
    ```
-   git clone https://github.com/<username>/snake-ai
+   git clone https://github.com/dhillyon/snake-ai
    ```
 4. Navigate to the cloned respository.
 5. Install dependencies.
